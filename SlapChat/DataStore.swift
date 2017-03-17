@@ -12,6 +12,7 @@ import CoreData
 class DataStore {
     
     var messages:[Message] = []
+    var recipients:[Recipient] = []
     
     static let sharedInstance = DataStore()
     
@@ -64,6 +65,8 @@ class DataStore {
     
     // MARK: - Core Data Fetching support
     
+    
+    
     func fetchData() {
         let context = persistentContainer.viewContext
         let messagesRequest: NSFetchRequest<Message> = Message.fetchRequest()
@@ -85,15 +88,30 @@ class DataStore {
         }
     }
     
+    
+    func addMessage(messageString: String, recipientMain: Recipient ) {
+        let context = persistentContainer.viewContext
+        let message = Message(context: context)
+        
+        message.content = messageString
+        message.recipient = recipientMain
+        message.createdAt = NSDate()
+        
+        saveContext()
+        fetchData()
+    }
     // MARK: - Core Data generation of test data
     
     func generateTestData() {
         let context = persistentContainer.viewContext
+        let recipientOne = addRecipient(nameString: "Raqrah", emailString: "rrahmey", phoneNumberString: "23456789", twitterHandleString: "rrahmey")
         
         let messageOne: Message = NSEntityDescription.insertNewObject(forEntityName: "Message", into: context) as! Message
         
         messageOne.content = "Message 1"
         messageOne.createdAt = NSDate()
+        messageOne.recipient = recipientOne
+        
         
         let messageTwo: Message = NSEntityDescription.insertNewObject(forEntityName: "Message", into: context) as! Message
         
@@ -107,6 +125,39 @@ class DataStore {
         
         saveContext()
         fetchData()
+        fetchRecipientData()
+    }
+    
+    func addRecipient(nameString:String, emailString: String, phoneNumberString: String, twitterHandleString: String)-> Recipient {
+        let context = persistentContainer.viewContext
+        let recipient = Recipient(context: context)
+        recipient.email = emailString
+        recipient.twitterHandle = twitterHandleString
+        recipient.name = nameString
+        recipient.phoneNumber = phoneNumberString
+        saveContext()
+        fetchRecipientData()
+        return recipient
+        
+    }
+    
+    func fetchRecipientData() {
+        let context = persistentContainer.viewContext
+        let recipientRequest: NSFetchRequest<Recipient> = Recipient.fetchRequest()
+        do { try recipients = context.fetch(recipientRequest)
+        }
+        catch{
+            
+        }
+    }
+    
+    func addMessageToRecipient( recipient: Recipient, message: Message) {
+        recipient.addToMessage(message)
+    }
+    
+    func getMessagesFor (recipient: Recipient) -> [Message]? {
+        guard let message = recipient.message else { return nil }
+        return message.allObjects as? [Message]
     }
     
 }

@@ -6,11 +6,14 @@
 //  Copyright © 2016 Flatiron School. All rights reserved.
 //
 
+
+
 import UIKit
 
 class TableViewController: UITableViewController {
     
     var store = DataStore.sharedInstance
+    var message = [Message]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +27,12 @@ class TableViewController: UITableViewController {
         store.fetchData()
         tableView.reloadData()
     }
+    
+
+    @IBAction func doneWithScreen(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
 
     // MARK: - Table view data source
     
@@ -33,14 +42,14 @@ class TableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return store.messages.count
+        return message.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "basicCell", for: indexPath)
 
-        let eachMessage = store.messages[indexPath.row]
+        let eachMessage = message[indexPath.row]
         
         cell.textLabel?.text = eachMessage.content
 
